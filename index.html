@@ -25,7 +25,7 @@
 }
 @media (min-width:900px){ :root{ --gut:clamp(24px,4vw,48px); --navh:72px; --tabh:54px } }
 *{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%; scroll-behavior:smooth; scroll-padding-top:calc(var(--navh) + var(--tabh) + 12px)}
+html{-webkit-text-size-adjust:100%; overflow-anchor:none; scroll-behavior:smooth; scroll-padding-top:calc(var(--navh) + var(--tabh) + 12px)}
 @media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto} }
 body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--f-body); font-size:1rem; line-height:1.6; -webkit-font-smoothing:antialiased; overflow-x:clip; padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))}
 img{max-width:100%; display:block}
@@ -464,10 +464,11 @@ body:has(#r-m:checked) .flow.p{display:none}
 </nav>
 <script>
 (function(){var anc=null,top=0;
-function up(el,sel){while(el&&!(el.matches&&el.matches(sel)))el=el.parentElement;return el;}
-function pick(){var h=document.querySelector('header.top');var y0=(h?h.getBoundingClientRect().bottom:0);var x=Math.round(window.innerWidth/2);var el=null;
-  [12,80,180,300].some(function(dy){var e=up(document.elementFromPoint(x,y0+dy),'.prod');if(e){el=e;return true;}});
-  if(!el)el=up(document.elementFromPoint(x,y0+12),'.prod,section,.hero-panel,.aviso-top,footer');anc=el;top=el?el.getBoundingClientRect().top:0;}
+function pick(){var h=document.querySelector('header.top');var y0=(h?h.getBoundingClientRect().bottom:0)+4;
+  var els=document.querySelectorAll('.prod,section,.hero-panel,footer'),span=null,below=null;
+  for(var i=0;i<els.length;i++){var r=els[i].getBoundingClientRect();if(r.height<=0)continue;if(r.top<=y0&&r.bottom>y0)span=els[i];else if(r.top>y0&&!below)below=els[i];}
+  var bt=below?below.getBoundingClientRect().top:1e9;var el=(bt<y0+120)?below:((span&&span.matches('.prod'))?span:((bt<y0+300)?below:(span||below)));
+  anc=el;top=el?el.getBoundingClientRect().top:0;}
 document.querySelectorAll('label[for="r-p"],label[for="r-m"],input[name="leitor"]').forEach(function(l){l.addEventListener('pointerdown',pick);l.addEventListener('keydown',pick);});
 document.querySelectorAll('input[name="leitor"]').forEach(function(r){r.addEventListener('change',function(){if(!anc)return;var d=anc.getBoundingClientRect().top-top;if(Math.abs(d)>1)window.scrollBy(0,d);});});
 })();
